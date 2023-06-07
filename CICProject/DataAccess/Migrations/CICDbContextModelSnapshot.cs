@@ -85,6 +85,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getdate()");
 
+                    b.Property<int?>("FileId")
+                        .HasColumnType("int");
+
                     b.Property<int>("RequestId")
                         .HasColumnType("int");
 
@@ -92,6 +95,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FileId")
+                        .IsUnique()
+                        .HasFilter("[FileId] IS NOT NULL");
 
                     b.HasIndex("RequestId");
 
@@ -115,6 +122,64 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Contacts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Name = "Email"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Name = "Phone"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Name = "Solman"
+                        },
+                        new
+                        {
+                            Id = (short)4,
+                            Name = "Request"
+                        });
+                });
+
+            modelBuilder.Entity("Entities.Concrete.File", b =>
+                {
+                    b.Property<int?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"), 1L, 1);
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileOriginalName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("Entities.Concrete.History", b =>
@@ -144,7 +209,23 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("History");
+                    b.ToTable("Histories");
+                });
+
+            modelBuilder.Entity("Entities.Concrete.NonWorkingDay", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NonWorkingDays");
                 });
 
             modelBuilder.Entity("Entities.Concrete.OperationClaim", b =>
@@ -179,6 +260,23 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Priorities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Name = "Low"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Name = "Medium"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Name = "High"
+                        });
                 });
 
             modelBuilder.Entity("Entities.Concrete.Request", b =>
@@ -210,6 +308,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("float");
 
                     b.Property<int?>("ExecutorId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FileId")
                         .HasColumnType("int");
 
                     b.Property<double?>("PlannedExecutionTime")
@@ -265,6 +366,10 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("ExecutorId");
 
+                    b.HasIndex("FileId")
+                        .IsUnique()
+                        .HasFilter("[FileId] IS NOT NULL");
+
                     b.HasIndex("PriorityId");
 
                     b.HasIndex("RequestTypeId");
@@ -291,6 +396,53 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RequestTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Name = "APP Change"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Name = "APP Issue"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Name = "APP New Requirement"
+                        },
+                        new
+                        {
+                            Id = (short)4,
+                            Name = "Change the Report"
+                        },
+                        new
+                        {
+                            Id = (short)5,
+                            Name = "Create Custom Report"
+                        },
+                        new
+                        {
+                            Id = (short)6,
+                            Name = "Create New Report"
+                        },
+                        new
+                        {
+                            Id = (short)7,
+                            Name = "Incident"
+                        },
+                        new
+                        {
+                            Id = (short)8,
+                            Name = "Master Data Change"
+                        },
+                        new
+                        {
+                            Id = (short)9,
+                            Name = "Service Request"
+                        });
                 });
 
             modelBuilder.Entity("Entities.Concrete.Status", b =>
@@ -308,6 +460,38 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Statuses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Name = "Açıq"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Name = "Qapalı"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Name = "İcrada"
+                        },
+                        new
+                        {
+                            Id = (short)4,
+                            Name = "Gözləmədə"
+                        },
+                        new
+                        {
+                            Id = (short)5,
+                            Name = "Təsdiqləndi"
+                        },
+                        new
+                        {
+                            Id = (short)6,
+                            Name = "İmtina edildi"
+                        });
                 });
 
             modelBuilder.Entity("Entities.Concrete.Type", b =>
@@ -325,6 +509,18 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Types");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            Name = "Application Maintenance"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Name = "Application Development"
+                        });
                 });
 
             modelBuilder.Entity("Entities.Concrete.User", b =>
@@ -346,15 +542,19 @@ namespace DataAccess.Migrations
                         .HasDefaultValueSql("getdate()");
 
                     b.Property<string>("Department")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("FileId")
+                        .HasColumnType("int");
+
                     b.Property<string>("InternalPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Mail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MobilePhone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -375,7 +575,6 @@ namespace DataAccess.Migrations
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Position")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Surname")
@@ -387,6 +586,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FileId")
+                        .IsUnique()
+                        .HasFilter("[FileId] IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -435,6 +638,10 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Entities.Concrete.Comment", b =>
                 {
+                    b.HasOne("Entities.Concrete.File", "File")
+                        .WithOne("Comment")
+                        .HasForeignKey("Entities.Concrete.Comment", "FileId");
+
                     b.HasOne("Entities.Concrete.Request", "Request")
                         .WithMany("Comments")
                         .HasForeignKey("RequestId")
@@ -446,6 +653,8 @@ namespace DataAccess.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("File");
 
                     b.Navigation("Request");
 
@@ -493,6 +702,10 @@ namespace DataAccess.Migrations
                         .HasForeignKey("ExecutorId")
                         .OnDelete(DeleteBehavior.NoAction);
 
+                    b.HasOne("Entities.Concrete.File", "File")
+                        .WithOne("Request")
+                        .HasForeignKey("Entities.Concrete.Request", "FileId");
+
                     b.HasOne("Entities.Concrete.Priority", "Priority")
                         .WithMany("Requests")
                         .HasForeignKey("PriorityId")
@@ -523,6 +736,8 @@ namespace DataAccess.Migrations
 
                     b.Navigation("Executor");
 
+                    b.Navigation("File");
+
                     b.Navigation("Priority");
 
                     b.Navigation("RequestType");
@@ -530,6 +745,15 @@ namespace DataAccess.Migrations
                     b.Navigation("Status");
 
                     b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("Entities.Concrete.User", b =>
+                {
+                    b.HasOne("Entities.Concrete.File", "File")
+                        .WithOne("User")
+                        .HasForeignKey("Entities.Concrete.User", "FileId");
+
+                    b.Navigation("File");
                 });
 
             modelBuilder.Entity("Entities.Concrete.UserOperationClaim", b =>
@@ -561,6 +785,18 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Entities.Concrete.Contact", b =>
                 {
                     b.Navigation("Requests");
+                });
+
+            modelBuilder.Entity("Entities.Concrete.File", b =>
+                {
+                    b.Navigation("Comment")
+                        .IsRequired();
+
+                    b.Navigation("Request")
+                        .IsRequired();
+
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Entities.Concrete.OperationClaim", b =>

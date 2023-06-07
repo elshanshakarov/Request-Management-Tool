@@ -1,12 +1,11 @@
 ﻿using Business.Abstract;
+using ClosedXML.Excel;
 using Core.Utilities.Results;
-using Entities.Concrete;
 using Entities.Dto;
 using Entities.Dto.Request;
 using Entities.Dto.Response;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-
 
 namespace WebAPI.Controllers
 {
@@ -15,32 +14,18 @@ namespace WebAPI.Controllers
     public class RequestsController : ControllerBase
     {
         private readonly IRequestService _requestService;
-        private readonly IHttpContextAccessor _contextAccessor;
-
 
         public RequestsController(IRequestService requestService)
         {
             _requestService = requestService;
         }
 
-        [HttpPost]
-        public IActionResult AddRequest(ReqRequestDto requestDto)
+        [HttpPost("AddRequest")]
+
+        public IActionResult AddRequest([FromForm] ReqRequestDto requestDto)
         {
             var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-
-            Request request = new Request
-            {
-                CreatorId = userId,
-                CategoryId = requestDto.CategoryId,
-                PriorityId = requestDto.PriorityId,
-                RequestTypeId = requestDto.RequestTypeId,
-                Tittle = requestDto.Tittle,
-                Text = requestDto.Text,
-                StatusId = requestDto.StatusId,
-            };
-
-            var result = _requestService.Add(request);
-
+            var result = _requestService.AddRequest(requestDto, userId);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -48,13 +33,36 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-
-        [HttpGet("GetAllRequests")]
-        public IActionResult GetAllRequests(RequestFilterDto requestFilterDto)
+        [HttpPost("UpdateRequest")]
+        public IActionResult UpdateRequest(RequestInfoDto requestInfoDto)
         {
             var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            IDataResult<List<RespRequestDto>> result = _requestService.GetAllFilteredRequests(userId, requestFilterDto);
+            var result = _requestService.UpdateRequest(requestInfoDto, userId);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
+        [HttpGet("GetRequestById")]
+        public IActionResult GetRequestById(int requestId)
+        {
+            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            var result = _requestService.GetRequestById(userId, requestId);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpGet("GetAllRequests")]
+        public IActionResult GetAllRequests(AllRequestFilterDto allRequestFilterDto)
+        {
+            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+            IDataResult<List<RespRequestDto>> result = _requestService.GetAllRequests(userId, allRequestFilterDto);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -64,10 +72,10 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("GetAllMyRequests")]
-        public IActionResult GetAllMyRequests(short? statusId)
+        public IActionResult GetAllMyRequests(MyRequestFilterDto myRequestFilterDto)
         {
             var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            var result = _requestService.GetAllMyRequests(userId, statusId);
+            var result = _requestService.GetAllMyRequests(userId, myRequestFilterDto);
 
             if (!result.Success)
             {
@@ -77,7 +85,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("GetCountOfAllRequests")]
-        public IActionResult GetCountOfAllRequests(RequestFilterDto requestFilterDto)
+        public IActionResult GetCountOfAllRequests(AllRequestFilterDto requestFilterDto)
         {
             var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
             var result = _requestService.GetCountOfAllRequests(userId, requestFilterDto);
@@ -111,11 +119,11 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetRequestByIdRequestDto")]
-        public IActionResult GetRequestByIdRequestDto(int requestId)
+        [HttpGet("GetAllReports")]
+        public IActionResult GetAllReports(ReportFilterDto reportFilterDto)
         {
             var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            var result = _requestService.GetRequestByIdRequestDto(userId, requestId);
+            var result = _requestService.GetAllReports(reportFilterDto, userId);
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -123,66 +131,53 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetRequestByIdCommentDto")]
-        public IActionResult GetRequestByIdCommentDto(int requestId)
+        [HttpGet("TransferToExcel")]
+        public IActionResult TransferToExcel(ExcelFilterDto excelFilterDto)
         {
             var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            var result = _requestService.GetRequestByIdCommentDto(userId, requestId);
-            if (!result.Success)
+            var result = _requestService.GetAllExcelReports(excelFilterDto, userId);
+            if (result.Success)
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add();
+                    var currentRowCount = 1;
+                    worksheet.Cell(currentRowCount, 1).Value = "ID";
+                    worksheet.Cell(currentRowCount, 2).Value = "Creator";
+                    worksheet.Cell(currentRowCount, 3).Value = "Category";
+                    worksheet.Cell(currentRowCount, 4).Value = "Date";
+                    worksheet.Cell(currentRowCount, 5).Value = "First Execution Date";
+                    worksheet.Cell(currentRowCount, 6).Value = "Execution Period";
+                    worksheet.Cell(currentRowCount, 7).Value = "Executor";
+                    worksheet.Cell(currentRowCount, 8).Value = "Closing Date";
+                    worksheet.Cell(currentRowCount, 9).Value = "Status";
+
+                    foreach (var report in result.Data)
+                    {
+                        currentRowCount++;
+                        worksheet.Cell(currentRowCount, 1).Value = report.RequestId;
+                        worksheet.Cell(currentRowCount, 2).Value = report.Creator;
+                        worksheet.Cell(currentRowCount, 3).Value = report.Category;
+                        worksheet.Cell(currentRowCount, 4).Value = report.CreationDate;
+                        worksheet.Cell(currentRowCount, 5).Value = report.ExecutionDate;
+                        worksheet.Cell(currentRowCount, 6).Value = report.ExecutionPeriod;
+                        worksheet.Cell(currentRowCount, 7).Value = report.Executor;
+                        worksheet.Cell(currentRowCount, 8).Value = report.ClosingDate;
+                        worksheet.Cell(currentRowCount, 9).Value = report.Status;
+                    }
+
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        var content = stream.ToArray();
+                        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Reports.xlsx");
+                    }
+                }
+            }
+            else
             {
                 return BadRequest(result);
             }
-            return Ok(result);
         }
-
-        [HttpPost("AddComment")]
-        public IActionResult AddComment(int requestId, string commentText)
-        {
-            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            var result = _requestService.AddComment(userId, requestId, commentText);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
-
-        [HttpGet("ChangeStatus")]
-        public IActionResult ChangeStatus(int requestId, short statusId)
-        {
-            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-            var result=_requestService.ChangeStatus(requestId, userId, statusId);
-            return null;
-        }
-
-
-
-
-
-
-
-        /*--------------------------------------------------------------------------------------------------------------------*/
-        [HttpDelete("{id}")]
-        public IActionResult DeleteRequest(int id)
-        {
-            var result = _requestService.Delete(id);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
-
-        [HttpPut]
-        public IActionResult UpdateRequest(ReqRequestDto reqRequestDto)
-        {
-            var result = _requestService.Update(reqRequestDto);
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
-
     }
 }

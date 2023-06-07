@@ -2,8 +2,6 @@
 using DataAccess.Abstract;
 using DataAccess.Context;
 using Entities.Concrete;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace DataAccess.Concrete
 {
@@ -16,7 +14,6 @@ namespace DataAccess.Concrete
             _context = context;
         }
 
-
         public List<OperationClaim> GetClaims(User user)
         {
             var result = from operationClaim in _context.OperationClaims
@@ -25,10 +22,7 @@ namespace DataAccess.Concrete
                          where userOperationClaim.User.Id == user.Id
                          select new OperationClaim { Id = operationClaim.Id, Name = operationClaim.Name };
 
-           
-
             return result.ToList();
         }
-
     }
 }

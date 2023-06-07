@@ -1,10 +1,10 @@
 ﻿using Business.Abstract;
+using Business.Constants;
 using Core.Utilities.Results;
-using Core.Utilities.Security.JWT;
+using Entities.Dto;
 using Entities.Dto.Request;
 using Entities.Dto.Response;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using IResult = Core.Utilities.Results.IResult;
 
@@ -15,7 +15,6 @@ namespace WebAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-
 
         public UsersController(IUserService userService)
         {
@@ -29,7 +28,6 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-
         [HttpGet]
         public IActionResult GetAllUser()
         {
@@ -40,20 +38,6 @@ namespace WebAPI.Controllers
             }
             return BadRequest();
         }
-
-
-
-        //[HttpPost]
-        //public IActionResult AddUser(ReqUserDto userDto)
-        //{
-        //    // User user = _mapper.Map<User>(userDto);
-        //    IResult result = _userService.Add(userDto);
-        //    if (result.Success)
-        //    {
-        //        return Ok(result);
-        //    }
-        //    return BadRequest(result);
-        //}
 
         [HttpPut]
         public IActionResult UpdateUser(ReqUserDto userDto)
@@ -79,14 +63,70 @@ namespace WebAPI.Controllers
 
 
 
-
-        [HttpGet("/currentId")]
-        public IActionResult current()
+        [HttpPost("UpdateProfile")]
+        public IActionResult UpdateProfile(UserDto userDto)
         {
-            var claims = HttpContext.User.Claims;
-            int id = Convert.ToInt32(claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
-
-            return Ok(new { userId = id });
+            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            if (userId == 0)
+            {
+                return BadRequest(new ErrorResult(Messages.UserNotFound));
+            }
+            IResult result = _userService.UpdateProfile(userDto, userId);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
         }
+
+        [HttpPost("UpdatePassword")]
+        public IActionResult UpdatePassword(string currentPassword, string newPassword, string againNewPassword)
+        {
+            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            if (userId == 0)
+            {
+                return BadRequest(new ErrorResult(Messages.UserNotFound));
+            }
+            IResult result = _userService.UpdatePassword(userId, currentPassword, newPassword, againNewPassword);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpPost("UpdateImage")]
+        public IActionResult UpdateImage(IFormFile file)
+        {
+            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            if (userId == 0)
+            {
+                return BadRequest(new ErrorResult(Messages.UserNotFound));
+            }
+            IResult result = _userService.UpdateImage(file, userId);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpPost("DeleteImage")]
+        public IActionResult DeleteImage()
+        {
+            var userId = Convert.ToInt32(HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            if (userId == 0)
+            {
+                return BadRequest(new ErrorResult(Messages.UserNotFound));
+            }
+            var result = _userService.DeleteImage(userId);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        
     }
 }

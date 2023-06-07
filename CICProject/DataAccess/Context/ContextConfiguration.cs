@@ -14,6 +14,5 @@ namespace DataAccess.Context
                 return configurationManager.GetConnectionString("DefaultConnection");
             }
         }
-
     }
 }

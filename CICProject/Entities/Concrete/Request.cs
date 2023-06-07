@@ -33,6 +33,8 @@ namespace Entities.Concrete
         public bool? Rountine { get; set; }
         public string? Code { get; set; }
         public string? RootCause { get; set; }
+        public int? FileId { get; set; }
+        public File? File { get; set; }
 
         public ICollection<History> Histories { get; set; }
         public ICollection<Comment> Comments { get; set; }

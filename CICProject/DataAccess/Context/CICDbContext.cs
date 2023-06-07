@@ -1,5 +1,6 @@
 ﻿using Entities.Concrete;
 using Microsoft.EntityFrameworkCore;
+using File = Entities.Concrete.File;
 using Type = Entities.Concrete.Type;
 
 namespace DataAccess.Context
@@ -13,6 +14,7 @@ namespace DataAccess.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Seed();
             modelBuilder.Entity<Request>().Property(p => p.Date).HasDefaultValueSql("getdate()");
             modelBuilder.Entity<Request>().Property(p => p.StatusId).HasDefaultValue((short)1);
             modelBuilder.Entity<User>().Property(p => p.Active).HasDefaultValue(true).IsRequired();
@@ -20,7 +22,6 @@ namespace DataAccess.Context
             modelBuilder.Entity<User>().Property(p => p.CreatedDate).HasDefaultValueSql("getdate()").IsRequired();
             modelBuilder.Entity<Request>().HasOne(x => x.Creator).WithMany(x => x.CreatorRequests).HasForeignKey(x => x.CreatorId).IsRequired(false).OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<Request>().HasOne(x => x.Executor).WithMany(x => x.ExecutorRequests).HasForeignKey(x => x.ExecutorId).IsRequired(false).OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<User>().HasKey(p => p.Id);
             modelBuilder.Entity<Comment>().Property(p => p.Date).HasDefaultValueSql("getdate()");
         }
 
@@ -36,8 +37,8 @@ namespace DataAccess.Context
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<Type> Types { get; set; }
         public DbSet<CategoryUser> CategoryUsers { get; set; }
-       
-        //  public DbSet<History> Histories { get; set; }
-
+        public DbSet<History> Histories { get; set; }
+        public DbSet<NonWorkingDay> NonWorkingDays { get; set; }
+        public DbSet<File> Files { get; set; }
     }
 }

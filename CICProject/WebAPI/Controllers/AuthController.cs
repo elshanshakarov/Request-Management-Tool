@@ -1,5 +1,7 @@
 ﻿using Business.Abstract;
+using Entities.Dto;
 using Entities.Dto.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -15,7 +17,27 @@ namespace WebAPI.Controllers
             _authService = authService;
         }
 
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public ActionResult Register(UserForRegisterDto userForRegisterDto)
+        {
+            var registerResult = _authService.Register(userForRegisterDto);
+            if (!registerResult.Success)
+            {
+                return BadRequest(registerResult.Message);
+            }
+
+            var tokenResult = _authService.CreateAccessToken(registerResult.Data);
+            if (!tokenResult.Success)
+            {
+                return BadRequest(tokenResult.Message);
+            }
+
+            return Ok(tokenResult.Data);
+        }
+
         [HttpPost("login")]
+        [AllowAnonymous]
         public ActionResult Login(UserForLoginDto userForLoginDto)
         {
             var userToLogin = _authService.Login(userForLoginDto);
@@ -33,22 +55,28 @@ namespace WebAPI.Controllers
             return Ok(result.Data);
         }
 
-        [HttpPost("register")]
-        public ActionResult Register(UserForRegisterDto userForRegisterDto)
+        [HttpPost("ForgotPassword")]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword(string mail)
         {
-            var registerResult = _authService.Register(userForRegisterDto);
-            if (!registerResult.Success)
+            var result = _authService.ForgotPassword(mail);
+            if (result.Success)
             {
-                return BadRequest(registerResult.Message);
+                return Ok(result);
             }
+            return BadRequest(result);
+        }
 
-            var result = _authService.CreateAccessToken(registerResult.Data);
-            if (!result.Success)
+        [HttpPost("ResetPassword")]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(ResetPasswordDto resetPassword)
+        {
+            var result = _authService.ResetPassword(resetPassword);
+            if (result.Success)
             {
-                return BadRequest(result.Message);
+                return Ok(result);
             }
-
-            return Ok(result.Data);
+            return BadRequest(result);
         }
 
     }

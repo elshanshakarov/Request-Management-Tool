@@ -10,6 +10,5 @@ namespace Entities.Concrete
 
         public ICollection<Request> Requests { get; set; }
         public ICollection<CategoryUser> CategoryUsers { get; set; }
-
     }
 }

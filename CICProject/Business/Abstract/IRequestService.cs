@@ -1,5 +1,4 @@
 ﻿using Core.Utilities.Results;
-using Entities.Concrete;
 using Entities.Dto;
 using Entities.Dto.Request;
 using Entities.Dto.Response;
@@ -8,25 +7,14 @@ namespace Business.Abstract
 {
     public interface IRequestService
     {
-
-        IDataResult<List<RespRequestDto>> GetAllFilteredRequests(int userId, RequestFilterDto requestFilterDto);
-        IDataResult<List<RespRequestDto>> GetAllMyRequests(int userId, short? statusId);
+        IResult AddRequest(ReqRequestDto requestDto, int userId);
+        IResult UpdateRequest(RequestInfoDto requestInfoDto, int userId);
+        IDataResult<List<RespRequestDto>> GetAllRequests(int userId, AllRequestFilterDto requestFilterDto);
+        IDataResult<List<RespRequestDto>> GetAllMyRequests(int userId, MyRequestFilterDto myRequestFilterDto);
         IDataResult<List<CountOfRequestsDto>> GetCountOfAllMyRequests(int userId, short? statusId);
-        IDataResult<List<CountOfRequestsDto>> GetCountOfAllRequests(int userId, RequestFilterDto requestFilterDto);
-        IDataResult<RequestByIdRequestDto> GetRequestByIdRequestDto(int userId, int requestId);
-        IDataResult<List<CommentDto>> GetRequestByIdCommentDto(int userId, int requestId);
-        IResult AddComment(int userId, int requestId, string commentText);
-        IResult ChangeStatus(int requestId, int userId, short statusId);
-
-
-
-
-        IResult Add(Request request);
-        IResult Update(ReqRequestDto request);
-        IResult Delete(int id);
-
-
-
-
+        IDataResult<List<CountOfRequestsDto>> GetCountOfAllRequests(int userId, AllRequestFilterDto requestFilterDto);
+        IDataResult<RequestDto> GetRequestById(int userId, int requestId);
+        IDataResult<List<ReportDto>> GetAllReports(ReportFilterDto reportFilterDto, int userId);
+        IDataResult<List<ReportDto>> GetAllExcelReports(ExcelFilterDto excelFilterDto, int userId);
     }
 }
