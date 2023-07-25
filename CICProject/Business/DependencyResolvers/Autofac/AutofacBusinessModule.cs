@@ -38,9 +38,6 @@ namespace Business.DependencyResolvers.Autofac
             builder.RegisterType<EfFileDal>().As<IFileDal>();
             builder.RegisterType<FileHelperManager>().As<IFileHelper>();
 
-
-
-
         }
     }
 }

@@ -26,7 +26,6 @@ namespace Core.DataAccess.EntityFramework.Concrete
 
         public void Delete(TEntity entity)
         {
-           
             var deletedEntity = _context.Entry(entity);
             deletedEntity.State = EntityState.Deleted;
             _context.SaveChanges();

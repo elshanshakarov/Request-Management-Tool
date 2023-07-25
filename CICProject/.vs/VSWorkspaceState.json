@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Entities",
+    "\\Entities\\Dto",
+    "\\Entities\\Dto\\Request"
   ],
-  "SelectedNode": "\\CICProject.sln",
+  "SelectedNode": "\\DataAccess",
   "PreviewInSolutionExplorer": false
 }

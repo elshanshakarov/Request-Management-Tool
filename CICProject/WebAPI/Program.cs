@@ -19,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(c => c.Filters.Add(new AuthorizeFilter()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
@@ -47,7 +48,8 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-builder.Services.AddDbContext<CICDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var connectionSTRING = builder.Configuration.GetSection("CICProject")["DefaultConnection"];
+builder.Services.AddDbContext<CICDbContext>(options => options.UseSqlServer(connectionSTRING));
 
 builder.Services.AddCors(options => { options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:3000")); });
 
